@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import errorMiddleware from './middlewares/error.middleware.js';
 import connectToDatabase from './config/db.js';
 import { PORT } from './config/env.js';
+import authRouter from './routes/auth.route.js';
 
 // ES6 module __dirname alternative
 const __filename = fileURLToPath(import.meta.url);
@@ -36,6 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
+app.use('/api/v1/auth', authRouter);
 
 app.use(errorMiddleware);
 
