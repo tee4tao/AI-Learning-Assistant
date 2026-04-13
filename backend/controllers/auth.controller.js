@@ -49,7 +49,33 @@ export const register = async (req, res, next) =>{
 // @access  Public
 export const login = async (req, res, next) =>{
     try {
-        
+        const { email, password } = req.body;
+
+        // validate input
+        if (!email || !password) {
+            return res.status(400).json({ success: false, error: "Please provide email and password" });
+        }
+
+        const userExists = await User.findOne({ email }).select("+password");
+        if(!userExists) {
+            return res.status(401).json({ success: false, error: "Invalid credentials" });
+        }
+
+        const isMatch = await bcrypt.compare(password, userExists.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, error: "Invalid credentials" });
+        }
+
+        const token = jwt.sign({ userId: userExists._id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+
+        res.status(200).json({
+            success: true,
+            message: 'User logged in successfully',
+            data: {
+                user: userExists,
+                token
+            }
+        });
     } catch (error) {
         next(error);
     }
@@ -60,7 +86,19 @@ export const login = async (req, res, next) =>{
 // @access  Private
 export const getProfile = async (req, res, next) =>{
     try {
-        
+        const user = await User.findById(req.user._id)
+
+        if (!user) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'User profile retrieved successfully',
+            data: {
+                user
+            }
+        });
     } catch (error) {
         next(error);
     }
@@ -71,7 +109,38 @@ export const getProfile = async (req, res, next) =>{
 // @access  Private
 export const updateProfile = async (req, res, next) =>{
     try {
-        
+        const {username, email, profileImage} = req.body;
+
+        const user = await User.findById(req.user._id);
+
+        if (username !==undefined) user.username = username;
+        if (email) user.email = email;
+        if (profileImage) user.profileImage = profileImage;
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'User profile updated successfully',
+            data: {
+                user
+            }
+        });
+
+
+        // const updatedUser = await User.findByIdAndUpdate(req.user._id, {username, email, profileImage}, { returnDocument: "after", runValidators: true });
+
+        // if (!updatedUser) {
+        //     return res.status(404).json({ success: false, error: "User not found" });
+        // }
+
+        // res.status(200).json({
+        //     success: true,
+        //     message: 'User profile updated successfully',
+        //     data: {
+        //         user: updatedUser
+        //     }
+        // });
     } catch (error) {
         next(error);
     }
@@ -82,7 +151,34 @@ export const updateProfile = async (req, res, next) =>{
 // @access  Private
 export const changePassword = async (req, res, next) =>{
     try {
-        
+        const {currentPassword, newPassword} = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, error: "Please provide current and new passwords" });
+        }
+
+        const user = await User.findById(req.user._id).select("+password");
+
+        if (!user) {
+            return res.status(404).json({ success: false, error: "User not found" });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, error: "Current password is incorrect" });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Password updated successfully'
+        });
+
     } catch (error) {
         next(error);
     }
