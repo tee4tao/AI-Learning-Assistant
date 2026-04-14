@@ -38,6 +38,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/documents', documentRouter);
 
 app.use(errorMiddleware);
 
