@@ -9,6 +9,7 @@ import errorMiddleware from './middlewares/error.middleware.js';
 import connectToDatabase from './config/db.js';
 import { PORT } from './config/env.js';
 import authRouter from './routes/auth.route.js';
+import documentRouter from './routes/document.route.js';
 
 // ES6 module __dirname alternative
 const __filename = fileURLToPath(import.meta.url);
