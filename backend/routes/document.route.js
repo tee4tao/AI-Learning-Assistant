@@ -1,5 +1,6 @@
 import { Router } from "express";
 import authorize from "../middlewares/auth.middleware.js";
+import { deleteDocument, getDocument, getDocuments, updateDocument, uploadDocument } from "../controllers/document.controller.js";
 
 const documentRouter = Router();
 
