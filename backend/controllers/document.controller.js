@@ -5,6 +5,7 @@ import { PORT } from "../config/env.js";
 import Document from "../models/document.model.js";
 import { extractTextFromPDF } from "../utils/pdfParser.js";
 import { chunkText } from "../utils/textChunker.js";
+import fs from 'fs/promises';
 
 // @access  Private
 export const uploadDocument = async (req, res, next) => {
