@@ -11,6 +11,7 @@ import { PORT } from './config/env.js';
 import authRouter from './routes/auth.route.js';
 import documentRouter from './routes/document.route.js';
 import flashcardRouter from './routes/flashcard.route.js';
+import aiRouter from './routes/ai.route.js';
 
 // ES6 module __dirname alternative
 const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +43,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/documents', documentRouter);
 app.use('/api/v1/flashcards', flashcardRouter);
+app.use('/api/v1/ai', aiRouter);
 
 app.use(errorMiddleware);
 

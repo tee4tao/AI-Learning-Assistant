@@ -3,8 +3,6 @@ import authorize from "../middlewares/auth.middleware.js";
 import { deleteDocument, getDocument, getDocuments, uploadDocument } from "../controllers/document.controller.js";
 import upload from "../config/multer.js";
 
-console.log(upload);
-
 
 const documentRouter = Router();
 
