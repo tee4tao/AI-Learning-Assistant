@@ -1,11 +1,14 @@
 // @desc    Upload PDF document
 // @route   POST /api/v1/documents/upload
 
+import mongoose from "mongoose";
 import { PORT } from "../config/env.js";
 import Document from "../models/document.model.js";
 import { extractTextFromPDF } from "../utils/pdfParser.js";
 import { chunkText } from "../utils/textChunker.js";
 import fs from 'fs/promises';
+import Flashcard from "../models/flashcard.model.js";
+import Quiz from "../models/quiz.model.js";
 
 // @access  Private
 export const uploadDocument = async (req, res, next) => {
@@ -134,7 +137,26 @@ export const getDocuments = async (req, res, next) => {
 // @access  Private
 export const getDocument = async (req, res, next) => {
     try {
-        
+        const document = await Document.findOne({_id: req.params.id, userId: req.user._id});
+
+        if (!document) {
+            return res.status(404).json({ success: false, error: 'Document not found' });
+        }
+
+        // Get counts of associated flashcards and quizzes
+        const flashcardCount = await Flashcard.countDocuments({documentId: document._id, userId: req.user._id});
+        const quizCount = await Quiz.countDocuments({documentId: document._id, userId: req.user._id});
+
+        // Update last accessed
+        document.lastAccessed = Date.now();
+        await document.save();
+
+        // Combine document data with counts
+        const documentData = document.toObject();
+        documentData.flashcardCount = flashcardCount;
+        documentData.quizCount = quizCount;
+
+        res.status(200).json({ success: true, data: documentData });
     } catch (error) {
         next(error);
     }
@@ -145,19 +167,18 @@ export const getDocument = async (req, res, next) => {
 // @access  Private
 export const deleteDocument = async (req, res, next) => {
     try {
-        
-    } catch (error) {
-        next(error);
-    }
-}
+        const document = await Document.findOne({_id: req.params.id, userId: req.user._id});
 
-// @desc    Update document title
-// @route   PUT /api/v1/documents/:id
-// @access  Private
-export const updateDocument = async (req, res, next) => {
-    try {
-        
-    } catch (error) {
+        if (!document) {
+            return res.status(404).json({ success: false, error: 'Document not found' });
+        }
+
+        // Delete file from filesystem
+        await fs.unlink(document.filePath).catch(() => {});
+
+        await Document.deleteOne();
+        res.status(200).json({ success: true, message: 'Document deleted successfully' });
+    }catch(error) {
         next(error);
     }
 }
