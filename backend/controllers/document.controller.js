@@ -32,6 +32,7 @@ export const uploadDocument = async (req, res, next) => {
             title,
             fileName: req.file.originalname,
             filePath: fileURl, // Store the URL instead of the local path
+            fileSize: req.file.size,
             status: 'processing'
         })
 
