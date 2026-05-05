@@ -3,7 +3,8 @@
 
 import Document from "../models/document.model.js";
 import Flashcard from "../models/flashcard.model.js";
-import { generateFlashcards } from "../utils/geminiService.js";
+import Quiz from "../models/quiz.model.js";
+import { generateDocumentSummary, generateFlashcards, generateQuizQuestions } from "../utils/geminiService.js";
 
 // @access  Private
 export const generateFlashcard = async (req, res, next) => {
@@ -51,7 +52,37 @@ export const generateFlashcard = async (req, res, next) => {
 // @access  Private
 export const generateQuiz = async (req, res, next) => {
   try {
-    
+        const {documentId, numQuestions = 5, title} = req.body;
+
+    if (!documentId) {
+      return res.status(400).json({ error: 'Document ID is required' });
+    }
+
+    const document = await Document.findOne({ _id: documentId, userId: req.user._id, status: 'ready' });
+
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Generate quiz using Gemini
+    const questions = await generateQuizQuestions(document.extractedText, parseInt(numQuestions));
+
+    // Save quiz to DB
+    const quiz = await Quiz.create({
+      userId: req.user._id,
+      documentId: document._id,
+      title: title || `${document.title} - Quiz`,
+      questions: questions,
+      totalQuestions: questions.length,
+      userAnswers: [],
+      score: 0
+    });
+
+    res.status(201).json({
+      success: true,
+      data: quiz,
+      message: 'Quiz generated successfully'
+    });
   } catch (error) {
     next(error);
   }
@@ -62,7 +93,29 @@ export const generateQuiz = async (req, res, next) => {
 // @access  Private
 export const generateSummary = async (req, res, next) => {
   try {
-    
+    const {documentId} = req.body;
+    if (!documentId) {
+      return res.status(400).json({ error: 'Document ID is required' });
+    }
+
+    const document = await Document.findOne({ _id: documentId, userId: req.user._id, status: 'ready' });
+
+    if (!document) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    // Generate summary using Gemini
+    const summary = await generateDocumentSummary(document.extractedText);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        documentId: document._id,
+        title: document.title,
+        summary
+      },
+      message: 'Summary generated successfully'
+    });
   } catch (error) {
     next(error);
   }
