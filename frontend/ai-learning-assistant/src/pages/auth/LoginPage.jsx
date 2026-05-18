@@ -7,8 +7,8 @@ import {ArrowRight, BrainCircuit, Lock, Mail} from 'lucide-react'
 
 const LoginPage = () => {
 
-  const [email, setEmail] = useState('tee4tao@gmail.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
@@ -58,7 +58,7 @@ const LoginPage = () => {
                   <input
                     type="email"
                     id="email"
-                    className='w-full h-12 pl-12 pr-4 border-2 border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 btext-sm font-medium transition-all duration-200 focus:outline-none focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-500/10'
+                    className='w-full h-12 pl-12 pr-4 border-2 border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 text-sm font-medium transition-all duration-200 focus:outline-none focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-500/10'
                     placeholder='you@email.com'
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -109,7 +109,7 @@ const LoginPage = () => {
                   ):(
                     <>
                       Sign in
-                      <ArrowRight className='w-4 h-4 group-hover:transition-transform duration-200' strokeWidth={2.5} />
+                      <ArrowRight className='w-4 h-4 group-hover:translate-x-1 transition-transform duration-200' strokeWidth={2.5} />
                     </>
                   )}
                 </span>
