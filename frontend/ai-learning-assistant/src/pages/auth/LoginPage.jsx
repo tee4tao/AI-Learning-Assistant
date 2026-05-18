@@ -7,7 +7,7 @@ import {ArrowRight, BrainCircuit, Lock, Mail} from 'lucide-react'
 
 const LoginPage = () => {
 
-  const [email, setEmail] = useState('tee4tao@tee4tao.com');
+  const [email, setEmail] = useState('tee4tao@gmail.com');
   const [password, setPassword] = useState('123456');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ const LoginPage = () => {
     setError('');
     setLoading(true);
     try {
-      const {user, token} = authService.login(email, password);
+      const {user, token} = await authService.login(email, password);
       login(user, token);
       toast.success('Login successful');
       navigate('/dashboard');
