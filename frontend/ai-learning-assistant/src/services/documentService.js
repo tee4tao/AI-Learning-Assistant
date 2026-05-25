@@ -25,7 +25,7 @@ const getDocuments = async () => {
 
 const deleteDocument = async (documentId) => {
     try {
-        const response = await axiosInstance.delete(API_PATHS.DOCUMENT.DELETE(documentId));
+        const response = await axiosInstance.delete(API_PATHS.DOCUMENT.DELETE_DOCUMENT(documentId));
         return response.data;
     } catch (error) {
         throw error.response?.data || { message: "An error occurred while deleting the document." }
