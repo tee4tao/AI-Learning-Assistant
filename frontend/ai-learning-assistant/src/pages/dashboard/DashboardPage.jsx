@@ -124,7 +124,7 @@ const DashboardPage = () => {
                      <div className="flex items-center gap-2 mb-1">
                       <div className={`size-2 rounded-full ${activity.type === 'document' ? 'bg-linear-to-r from-blue-400 to-cyan-500' : 'bg-linear-to-r from-emerald-400 to-teal-500'}`} />
                         <p className="text-sm font-medium text-slate-900 truncate">
-                          {activity.type === 'document' ? 'Accessed Document' : 'Attempted Quiz'}
+                          {activity.type === 'document' ? 'Accessed Document: ' : 'Attempted Quiz: '}
                           <span className="text-slate-700">
                             {activity.description}
                           </span>
