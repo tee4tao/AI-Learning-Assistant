@@ -6,6 +6,7 @@ import Spinner from '../../components/common/Spinner';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import PageHeader from '../../components/common/PageHeader';
 import Tabs from '../../components/common/Tabs';
+import ChatInterface from '../../components/chat/ChatInterface';
 
 const DocumentDetailPage = () => {
 
@@ -73,7 +74,7 @@ const DocumentDetailPage = () => {
   }
 
   const renderChat = () =>{
-    return "renderChat"
+    return <ChatInterface />
   }
 
   const renderAIActions = () =>{
