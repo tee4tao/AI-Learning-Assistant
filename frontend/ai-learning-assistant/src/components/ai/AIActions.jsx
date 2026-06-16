@@ -38,6 +38,7 @@ const AIActions = () => {
         setLoadingAction("explain");
         try {
             const {explanation} = await aiService.explainConcept(documentId, concept);
+            
             setModalTitle(`Explanation of ${concept}`);
             setModalContent(explanation);
             setIsModalOpen(true);
