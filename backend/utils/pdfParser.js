@@ -25,20 +25,39 @@
 //     }
 // };
 
-import fs from 'fs/promises';
+// import fs from 'fs/promises';
 
-/**
- * Extract text from PDF file
- * @param {string} filePath - Path to the PDF file
- * @returns {Promise<string>} - Extracted text from the PDF
- */
-export const extractTextFromPDF = async (filePath) => {
+// /**
+//  * Extract text from PDF file
+//  * @param {string} filePath - Path to the PDF file
+//  * @returns {Promise<string>} - Extracted text from the PDF
+//  */
+// export const extractTextFromPDF = async (filePath) => {
+//     try {
+//         const { PDFParse } = await import('pdf-parse');
+
+//         const dataBuffer = await fs.readFile(filePath);
+//         // pdf-parse expects a Uint8Array, not a Buffer
+//         const parser = new PDFParse(new Uint8Array(dataBuffer));
+//         const data = await parser.getText();
+
+//         return {
+//             text: data.text,
+//             numPages: data.numpages,
+//             info: data.info
+//         };
+//     } catch (error) {
+//         console.error(`Error parsing PDF: ${error.message}`);
+//         throw new Error("Failed to extract text from PDF");
+//     }
+// };
+
+export const extractTextFromPDF = async (fileBuffer) => {
     try {
         const { PDFParse } = await import('pdf-parse');
 
-        const dataBuffer = await fs.readFile(filePath);
-        // pdf-parse expects a Uint8Array, not a Buffer
-        const parser = new PDFParse(new Uint8Array(dataBuffer));
+        // fileBuffer is already a Buffer from multer memoryStorage — just wrap it
+        const parser = new PDFParse(new Uint8Array(fileBuffer));
         const data = await parser.getText();
 
         return {

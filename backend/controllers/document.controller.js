@@ -40,7 +40,8 @@ export const uploadDocument = async (req, res, next) => {
         })
 
         // Process PDF in background (in production, use a task queue like BullMQ)
-        processPDF(document._id, req.file.path).catch((error) => {
+        // processPDF(document._id, req.file.path).catch((error) => {
+        processPDF(document._id, req.file.buffer).catch((error) => {
             console.error('Error processing PDF:', error);
         });
 
@@ -53,9 +54,9 @@ export const uploadDocument = async (req, res, next) => {
     }
 }
 
-const processPDF = async (documentId, filePath) => {
+const processPDF = async (documentId, fileBuffer) => {
     try {
-        const {text} = await extractTextFromPDF(filePath);
+        const {text} = await extractTextFromPDF(fileBuffer);
     
         const chunks = chunkText(text, 500, 50);
     
