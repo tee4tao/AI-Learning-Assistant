@@ -1,6 +1,31 @@
-import fs from 'fs/promises';
-import { PDFParse } from 'pdf-parse';
+// import fs from 'fs/promises';
+// import { PDFParse } from 'pdf-parse';
 
+
+// /**
+//  * Extract text from PDF file
+//  * @param {string} filePath - Path to the PDF file
+//  * @returns {Promise<string>} - Extracted text from the PDF
+//  */
+// export const extractTextFromPDF = async (filePath) => {
+//     try {
+//         const dataBuffer = await fs.readFile(filePath);
+//         // pdf-parse expects a Unit8Array, not a Buffer
+//         const parser = new PDFParse(new Uint8Array(dataBuffer));
+//         const data = await parser.getText();
+//         // const pdfData = await PDFParse(dataBuffer);
+//         return {
+//             text: data.text,
+//             numPages: data.numpages,
+//             info: data.info
+//         };
+//     } catch (error) {
+//         console.error(`Error parsing PDF: ${error.message}`);
+//         throw new Error("Failed to extract text from PDF");
+//     }
+// };
+
+import fs from 'fs/promises';
 
 /**
  * Extract text from PDF file
@@ -9,11 +34,13 @@ import { PDFParse } from 'pdf-parse';
  */
 export const extractTextFromPDF = async (filePath) => {
     try {
+        const { PDFParse } = await import('pdf-parse');
+
         const dataBuffer = await fs.readFile(filePath);
-        // pdf-parse expects a Unit8Array, not a Buffer
+        // pdf-parse expects a Uint8Array, not a Buffer
         const parser = new PDFParse(new Uint8Array(dataBuffer));
         const data = await parser.getText();
-        // const pdfData = await PDFParse(dataBuffer);
+
         return {
             text: data.text,
             numPages: data.numpages,
