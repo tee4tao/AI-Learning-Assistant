@@ -2,54 +2,94 @@
 // @route   POST /api/v1/documents/upload
 
 import mongoose from "mongoose";
-import { PORT } from "../config/env.js";
+// import { PORT } from "../config/env.js";
 import Document from "../models/document.model.js";
 import { extractTextFromPDF } from "../utils/pdfParser.js";
 import { chunkText } from "../utils/textChunker.js";
 import fs from 'fs/promises';
 import Flashcard from "../models/flashcard.model.js";
 import Quiz from "../models/quiz.model.js";
+import { put, del } from '@vercel/blob';
 
 // @access  Private
+// export const uploadDocument = async (req, res, next) => {
+//     try {
+//         if (!req.file) {
+//             return res.status(400).json({ success: false, error: 'Please upload a PDF file' });
+//         }
+
+//         const {title} = req.body;
+
+//         if (!title) {
+//             // Delete the uploaded file
+//             await fs.unlink(req.file.path);
+//             return res.status(400).json({ success: false, error: 'Document title is required' });
+//         }
+
+//         // construct the url for the uploaded file
+//         const baseUrl = `http://localhost:${PORT || 8000}`;
+//         const fileURl = `${baseUrl}/uploads/documents/${req.file.filename}`;
+
+//         // Create document record in the database
+//         const document = await Document.create({
+//             userId: req.user._id,
+//             title,
+//             fileName: req.file.originalname,
+//             filePath: fileURl, // Store the URL instead of the local path
+//             fileSize: req.file.size,
+//             status: 'processing'
+//         })
+
+//         // Process PDF in background (in production, use a task queue like BullMQ)
+//         // processPDF(document._id, req.file.path).catch((error) => {
+//         processPDF(document._id, req.file.buffer).catch((error) => {
+//             console.error('Error processing PDF:', error);
+//         });
+
+//         res.status(201).json({ success: true, data: document, message: 'Document uploaded successfully. Processing in progress...' });
+//     } catch (error) {
+//         if (req.file) {
+//             await fs.unlink(req.file.path).catch(()=> {});
+//         }
+//         next(error);
+//     }
+// }
+
 export const uploadDocument = async (req, res, next) => {
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, error: 'Please upload a PDF file' });
         }
 
-        const {title} = req.body;
+        const { title } = req.body;
 
         if (!title) {
-            // Delete the uploaded file
-            await fs.unlink(req.file.path);
             return res.status(400).json({ success: false, error: 'Document title is required' });
         }
 
-        // construct the url for the uploaded file
-        const baseUrl = `http://localhost:${PORT || 8000}`;
-        const fileURl = `${baseUrl}/uploads/documents/${req.file.filename}`;
+        // Upload the PDF buffer to Vercel Blob storage
+        const uniqueFilename = `documents/${Date.now()}-${req.file.originalname}`;
+        const blob = await put(uniqueFilename, req.file.buffer, {
+            access: 'public',
+            contentType: 'application/pdf',
+        });
 
-        // Create document record in the database
+        // Create document record — filePath is now the real, permanent Blob URL
         const document = await Document.create({
             userId: req.user._id,
             title,
             fileName: req.file.originalname,
-            filePath: fileURl, // Store the URL instead of the local path
+            filePath: blob.url,
             fileSize: req.file.size,
             status: 'processing'
         })
 
-        // Process PDF in background (in production, use a task queue like BullMQ)
-        // processPDF(document._id, req.file.path).catch((error) => {
         processPDF(document._id, req.file.buffer).catch((error) => {
             console.error('Error processing PDF:', error);
         });
 
         res.status(201).json({ success: true, data: document, message: 'Document uploaded successfully. Processing in progress...' });
     } catch (error) {
-        if (req.file) {
-            await fs.unlink(req.file.path).catch(()=> {});
-        }
         next(error);
     }
 }
@@ -166,20 +206,41 @@ export const getDocument = async (req, res, next) => {
 // @desc    Delete a document
 // @route   DELETE /api/v1/documents/:id
 // @access  Private
+// export const deleteDocument = async (req, res, next) => {
+//     try {
+//         const document = await Document.findOne({_id: req.params.id, userId: req.user._id});
+
+//         if (!document) {
+//             return res.status(404).json({ success: false, error: 'Document not found' });
+//         }
+
+//         // Delete file from filesystem
+//         await fs.unlink(document.filePath).catch(() => {});
+
+//         await Document.deleteOne();
+//         res.status(200).json({ success: true, message: 'Document deleted successfully' });
+//     }catch(error) {
+//         next(error);
+//     }
+// }
 export const deleteDocument = async (req, res, next) => {
     try {
-        const document = await Document.findOne({_id: req.params.id, userId: req.user._id});
+        const document = await Document.findOne({ _id: req.params.id, userId: req.user._id });
 
         if (!document) {
             return res.status(404).json({ success: false, error: 'Document not found' });
         }
 
-        // Delete file from filesystem
-        await fs.unlink(document.filePath).catch(() => {});
+        // Delete the file from Vercel Blob storage
+        if (document.filePath) {
+            await del(document.filePath).catch((err) => {
+                console.error('Error deleting blob:', err.message);
+            });
+        }
 
-        await Document.deleteOne();
+        await Document.deleteOne({ _id: document._id });
         res.status(200).json({ success: true, message: 'Document deleted successfully' });
-    }catch(error) {
+    } catch (error) {
         next(error);
     }
 }
