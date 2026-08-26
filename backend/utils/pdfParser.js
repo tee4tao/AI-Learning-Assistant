@@ -52,6 +52,28 @@
 //     }
 // };
 
+
+
+
+// Minimal polyfills so pdfjs-dist (used internally by pdf-parse) doesn't crash
+// in Node.js — we only need text extraction, not rendering, so these can be
+// no-op stand-ins.
+if (typeof globalThis.DOMMatrix === 'undefined') {
+    globalThis.DOMMatrix = class DOMMatrix {
+        constructor() {}
+    };
+}
+if (typeof globalThis.Path2D === 'undefined') {
+    globalThis.Path2D = class Path2D {
+        constructor() {}
+    };
+}
+if (typeof globalThis.ImageData === 'undefined') {
+    globalThis.ImageData = class ImageData {
+        constructor() {}
+    };
+}
+
 export const extractTextFromPDF = async (fileBuffer) => {
     try {
         const { PDFParse } = await import('pdf-parse');
