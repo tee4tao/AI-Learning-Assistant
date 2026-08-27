@@ -13,7 +13,6 @@ const DashboardPage = () => {
     const fetchDashboardData = async () => {
       try {
         const data = await progressService.getDashboardData();
-        console.log(data);
         setDashboardData(data.data);
         setLoading(false);
       } catch (error) {
