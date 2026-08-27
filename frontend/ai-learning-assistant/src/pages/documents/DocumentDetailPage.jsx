@@ -49,8 +49,6 @@ const DocumentDetailPage = () => {
     return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
   };
 
-  console.log(getPdfUrl());
-
   const renderContent = () => {
     if (loading) {
       return <Spinner />;

@@ -102,17 +102,13 @@ import { extractText, getDocumentProxy } from 'unpdf';
  */
 export const extractTextFromPDF = async (fileBuffer) => {
     try {
-        const data = fileBuffer instanceof Uint8Array
-            ? fileBuffer
-            : new Uint8Array(fileBuffer);
+        // Always coerce to a plain Uint8Array — Buffer is technically a subclass
+        // of Uint8Array (so `instanceof Uint8Array` is misleadingly true for it),
+        // but unpdf/pdfjs-dist strictly requires the exact Uint8Array type.
+        const data = new Uint8Array(fileBuffer);
 
-        // Load the PDF into unpdf's serverless PDF.js build (no worker, no DOM needed)
         const pdf = await getDocumentProxy(data);
-
-        // Extract and merge text across all pages into a single string
         const { text, totalPages } = await extractText(pdf, { mergePages: true });
-
-        // Pull document metadata (title, author, etc.) via the underlying PDF.js proxy
         const { info } = await pdf.getMetadata();
 
         return {
