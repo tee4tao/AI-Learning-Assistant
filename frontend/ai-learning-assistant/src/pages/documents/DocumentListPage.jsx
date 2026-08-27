@@ -234,7 +234,7 @@ const DocumentListPage = () => {
                       </>
                     )}
                   </p>
-                  <p className="text-xs text-slate-500">PDF up to 10MB</p>
+                  <p className="text-xs text-slate-500">PDF up to 4MB</p>
                 </div>
               </div>
             </div>
